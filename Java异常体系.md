@@ -94,9 +94,15 @@ try {
 
 当捕获到对应的异常时会执行catch代码块中的代码
 
-无论如何finally代码块都会被执行**(不确定,有待试验,在抛出Error异常后会被执行吗?)**
+~~无论如何finally代码块都会被执行~~
 
-
+>  `finally` will not execute in below cases:
+> case 1 :
+> When you are executing `System.exit()`.
+> case 2 :
+> When your JVM / Thread crashes.
+> case 3 :
+> When your execution is stopped in between manually.
 
 ## try-with-resource
 
@@ -195,3 +201,55 @@ assert 条件:表达式;
 
 默认情况下断言被禁(当方法上有@org.junit.jupiter.api.Test注解时会被打开)用可以使用`java -enableasserttions MyApp`或`-ea`打开
 
+## NoClassDefFoundError 和 ClassNotFoundException 有什么区别
+
+首先看一下这两个类的继承
+
+![image-20211124124034368](https://raw.githubusercontent.com/Jinxuyang/my-note/master/assets/image-20211124124034368.png)
+
+![image-20211124124057593](https://raw.githubusercontent.com/Jinxuyang/my-note/master/assets/image-20211124124057593.png)
+
+NoClassDefFoundError 是继承Error的
+
+> Error描述了Java运行时系统的内部错误和我资源耗尽错误,程序不应该抛出这种类型的对象,这样的问题除了告诉用户,尽力使程序安全终止之外,就无能为力了
+
+ClassNotFoundException 是继承Exception
+
+> Exception又分为两个个分支,一个分支派生于RuntimeException,另一个分支包含其他异常
+
+
+
+
+ClassNotFoundException的注释
+
+
+> Thrown when an application tries to load in a class through its string name using:
+> - The forName method in class Class.
+> - The findSystemClass method in class ClassLoader .
+> - The loadClass method in class ClassLoader.
+> - but no definition for the class with the specified name could be found.
+
+大概意思就是
+
+当程序使用名字去加载一个类时产生
+
+比如: Class的forName方法,ClassLoader的findSystemClass方法,ClassLoader的loadClass方法,在找不到指定名称的类时会抛出这个异常
+
+
+
+NoClassDefFoundError 的注释
+
+> Thrown if the Java Virtual Machine or a ClassLoader instance tries to load in the definition of a class (as part of a normal method call or as part of creating a new instance using the new expression) and no definition of the class could be found.
+> The searched-for class definition existed when the currently executing class was compiled, but the definition can no longer be found.
+
+没看懂
+
+> After you compile your code, you end up with `.class` files for each class in your program. These binary files are the bytecode that Java interprets to execute your program. The `NoClassDefFoundError` indicates that the classloader (in this case `java.net.URLClassLoader`), which is responsible for dynamically loading classes, cannot find the `.class` file for the class that you're trying to use.
+
+https://stackoverflow.com/questions/17973970/how-can-i-solve-java-lang-noclassdeffounderror
+
+这个是StackOverflow上一个回答的解释
+
+意思就是代码编译完后,可以得到每个类对应的`.class`文件
+
+classloader 找不到对应类的`.class`
